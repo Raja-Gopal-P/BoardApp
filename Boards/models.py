@@ -12,7 +12,7 @@ class Board(models.Model):
 
 
 class Topic(models.Model):
-    subject = models.CharField(max_length=255)
+    subject = models.CharField(max_length=255, unique=True)
     last_updated = models.DateTimeField(auto_now_add=True)
 
     # Foreign Keys
@@ -31,7 +31,7 @@ class Post(models.Model):
     # Foreign Keys
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='posts',)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
-    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='+')
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='+')
 
     def __str__(self):
         return '%s : %s' % (self.topic.__str__(), self.message,)

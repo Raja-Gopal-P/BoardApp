@@ -2,13 +2,13 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 from django.urls import resolve
-from .models import Board
-from .models import Topic
-from .models import Post
-from .views import board_page
-from .views import index
-from .views import new_topic
-from .forms import NewTopicForm
+from ..models import Board
+from ..models import Topic
+from ..models import Post
+from ..views import board_page
+from ..views import index
+from ..views import new_topic
+from ..forms import NewTopicForm
 
 
 class ModelTest(TestCase):
@@ -63,7 +63,8 @@ class BoardTopicsTest(TestCase):
 class NewTopicTests(TestCase):
     def setUp(self):
         Board.objects.create(name='Django', description='Django board.')
-        User.objects.create_user(username='john', email='john@doe.com', password='123')
+        self.user = User.objects.create_user(username='john', email='john@doe.com', password='123')
+        self.client.login(username='john', password='123')
 
     def test_new_topic_view_success_status_code(self):
         url = reverse('Boards:new_topic', kwargs={'pk': 1})
@@ -118,9 +119,8 @@ class NewTopicTests(TestCase):
         self.assertFalse(Topic.objects.exists())
         self.assertFalse(Post.objects.exists())
 
-    def test_contains_form(self):  # <- new test
+    def test_contains_form(self):  # <- new tests
         url = reverse('Boards:new_topic', kwargs={'pk': 1})
         response = self.client.get(url)
         form = response.context.get('form')
         self.assertIsInstance(form, NewTopicForm)
-

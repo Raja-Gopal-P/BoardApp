@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from django.utils.html import mark_safe
+from markdown import markdown
+
 
 # Create your models here.
 class Board(models.Model):
@@ -39,6 +42,9 @@ class Post(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='posts',)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='+')
+
+    def get_message_as_markdown(self):
+        return mark_safe(markdown(self.message, safe_mode='escape'))
 
     def __str__(self):
         return '%s : %s' % (self.topic.__str__(), self.message,)

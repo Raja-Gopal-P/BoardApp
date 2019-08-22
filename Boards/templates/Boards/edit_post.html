@@ -2,6 +2,10 @@
 
 {% block title %} Edit Post {% endblock %}
 
+{% block stylesheet %}
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+{% endblock %}
+
 {% block breadcrumb %}
 <li class="breadcrumb-item"><a href="{% url 'Boards:index' %}">Boards</a></li>
 <li class="breadcrumb-item"><a href="{% url 'Boards:board' post.topic.board.pk %}">{{ post.topic.board.name }}</a></li>
@@ -17,4 +21,11 @@
     <button type="submit" class="btn btn-success">Save changes</button>
     <a href="{% url 'Boards:topic_view' post.topic.board.pk post.topic.pk %}" class="btn btn-outline-secondary" role="button">Cancel</a>
   </form>
+{% endblock %}
+
+{% block javascript %}
+  <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+  <script>
+    var simplemde = new SimpleMDE();
+  </script>
 {% endblock %}

@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.views.generic import UpdateView
+from django.views.generic import ListView
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .models import Board
 from .models import Topic
@@ -15,17 +16,44 @@ from .forms import NewTopicForm
 from .forms import PostForm
 
 
-# Create your views here.
-def index(request):
-    boards = Board.objects.all()
+class IndexView(ListView):
+    model = Board
+    template_name = 'Boards/index.html'
+    context_object_name = 'boards'
 
-    return HttpResponse(render(request, 'Boards/index.html', {'boards': boards}))
+
+class TopicListView(ListView):
+    model = Topic
+    context_object_name = 'topics'
+    template_name = 'Boards/topics.html'
+    paginate_by = 20
+
+    def get_context_data(self, **kwargs):
+        kwargs['board'] = self.board
+        return super().get_context_data(**kwargs)
+
+    def get_queryset(self):
+        self.board = get_object_or_404(Board, pk=self.kwargs.get('pk'))
+        queryset = self.board.topics.order_by('-last_updated').annotate(replies=Count('posts') - 1)
+        return queryset
 
 
-def board_page(request, pk):
-    board = get_object_or_404(Board, pk=pk)
-    topics = board.topics.order_by('-last_updated').annotate(replies=Count('posts') - 1)
-    return render(request, 'Boards/topics.html', {'board': board, 'topics': topics})
+class PostListView(ListView):
+    model = Post
+    context_object_name = 'posts'
+    template_name = 'Boards/topic_posts.html'
+    paginate_by = 2
+
+    def get_context_data(self, **kwargs):
+        self.topic.views += 1
+        self.topic.save()
+        kwargs['topic'] = self.topic
+        return super().get_context_data(**kwargs)
+
+    def get_queryset(self):
+        self.topic = get_object_or_404(Topic, board__pk=self.kwargs.get('board_pk'), pk=self.kwargs.get('topic_pk'))
+        queryset = self.topic.posts.order_by('created_at')
+        return queryset
 
 
 @login_required
@@ -49,14 +77,6 @@ def new_topic(request, pk):
     else:
         form = NewTopicForm()
     return render(request, 'Boards/new-topic.html', {'board': board, 'form': form})
-
-
-@login_required
-def topic_view(request, board_pk, topic_pk):
-    topic = get_object_or_404(Topic, pk=topic_pk)
-    topic.views += 1
-    topic.save()
-    return render(request, 'Boards/topic_posts.html', {'topic': topic})
 
 
 @login_required

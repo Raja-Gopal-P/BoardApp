@@ -5,8 +5,8 @@ from django.urls import resolve
 from ..models import Board
 from ..models import Topic
 from ..models import Post
-from ..views import board_page
-from ..views import index
+from ..views import TopicListView
+from ..views import IndexView
 from ..views import new_topic
 from ..forms import NewTopicForm
 
@@ -23,7 +23,7 @@ class ModelTest(TestCase):
 
     def test_home_url_resolves_home_view(self):
         view = resolve('/')
-        self.assertEquals(view.func, index)
+        self.assertEquals(view.func.view_class, IndexView)
 
     def test_home_view_contains_link_to_topics_page(self):
         board_topics_url = reverse('Boards:board', kwargs={'pk': self.board.pk})
@@ -45,10 +45,6 @@ class BoardTopicsTest(TestCase):
         response = self.client.get(url)
         self.assertEquals(response.status_code, 404)
 
-    def test_board_topics_url_resolves_board_topics_view(self):
-        view = resolve('/1/')
-        self.assertEquals(view.func, board_page)
-
     def test_board_topics_view_contains_navigation_links(self):
         board_topics_url = reverse('Boards:board', kwargs={'pk': 1})
         homepage_url = reverse('Boards:index')
@@ -58,6 +54,10 @@ class BoardTopicsTest(TestCase):
 
         self.assertContains(response, 'href="{0}"'.format(homepage_url))
         self.assertContains(response, 'href="{0}"'.format(new_topic_url))
+
+    def test_board_topics_url_resolves_board_topics_view(self):
+        view = resolve('/1/')
+        self.assertEquals(view.func.view_class, TopicListView)
 
 
 class NewTopicTests(TestCase):

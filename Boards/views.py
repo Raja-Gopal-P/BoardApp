@@ -7,7 +7,6 @@ from django.views.generic import UpdateView
 from django.views.generic import ListView
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .models import Board
 from .models import Topic

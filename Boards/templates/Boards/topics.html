@@ -19,7 +19,7 @@
     <a href="{% url 'Boards:new_topic' board.pk %}" class="btn btn-primary">New topic</a>
   </div>
 
-<table class="table">
+<table class="table table-striped mb-4">
     <thead class="thead-dark">
       <tr>
         <th>Topic</th>
@@ -32,7 +32,23 @@
     <tbody>
       {% for topic in topics %}
         <tr>
-            <td><a href="{% url 'Boards:topic_view' board_pk=board.pk topic_pk=topic.pk %}">{{ topic.subject }}</a></td>
+            <td>
+                <p class="mb-0">
+                <a href="{% url 'Boards:topic_view' board_pk=board.pk topic_pk=topic.pk %}">{{ topic.subject }}</a>
+                </p>
+                <small class="text-muted">
+              Pages:
+              {% for i in topic.get_page_range %}
+                    {% if not forloop.first %}
+                    ,
+                    {% endif %}
+                <a href="{% url 'Boards:topic_view' board.pk topic.pk %}?page={{ i }}">{{ i }}</a>
+              {% endfor %}
+              {% if topic.has_many_pages %}
+              ... <a href="{% url 'Boards:topic_view' board.pk topic.pk %}?page={{ topic.get_page_count }}">Last Page</a>
+              {% endif %}
+            </small>
+            </td>
           <td>{{ topic.starter.username }}</td>
           <td>{{ topic.replies }}</td>
           <td>{{ topic.views }}</td>
